@@ -1,0 +1,22 @@
+
+/* ip header */
+typedef struct ipheader
+{
+	/* NOTE: ip_ver and iph_ihl should be anded to take up only one byte
+	 	 iph_flag and iph_offset should be anded and take up only a short int */
+
+	unsigned char 		iph_ver; /* 4 or 6 */ /* IP version */
+	unsigned char 		iph_ihl; /* 5 */ /* IP header length in 32b words*/
+	unsigned char		iph_tos; /* IP type of service */
+	unsigned short int 	iph_len; /* Length of total IP packet including header in bytes*/
+	unsigned short int 	iph_ident; /* Sender defined identifier */
+	unsigned char 		iph_flag; /* Flags for fragment control */
+	unsigned short int 	iph_offset; /* Offset of this payload after being fragmented */
+	unsigned char 		iph_ttl; /* Time to live */
+	unsigned char 		iph_protocol; /* Protocol identifier */
+	unsigned short int 	iph_chksum; /* Checksum */
+	unsigned int 		iph_sourceip; /* Source IP address */
+	unsigned int 		iph_destip; /* Destination IP address */
+
+	/* Totals 5 words or 40 bytes when no options included */
+} ipheader_t;
