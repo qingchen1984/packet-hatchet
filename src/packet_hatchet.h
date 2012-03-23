@@ -7,6 +7,8 @@
 
 typedef struct arg_file arg_file_t;
 typedef struct arg_lit arg_lit_t;
+typedef struct arg_int arg_int_t;
+typedef struct arg_str arg_str_t;
 typedef struct arg_end arg_end_t;
 
 enum Protocol { proto_ICMP, proto_UDP, proto_TCP, proto_invalid };
