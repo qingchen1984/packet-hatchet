@@ -10,15 +10,20 @@ int main(int argc, char** argv)
 {
 	int exitstatus = 0;
 
+
 	/* declare CL args */
 	arg_lit_t *help = (arg_lit_t*) arg_lit0("h", "help", "prints the command glossary");
 	arg_lit_t *myip = (arg_lit_t*) arg_lit0("m", NULL, "prints the external ip of the interface currently being used");
+	
 	arg_file_t *proto = (arg_file_t*) arg_filen("p", "protocol", "acronym", 0, 1, "specify the protocol being manipulated");
 	arg_file_t *source = (arg_file_t*) arg_filen("s", "source", "x.x.x.x", 0, 1, "specify the source IP");
 	arg_file_t *dest = (arg_file_t*) arg_filen("d", "dest", "x.x.x.x", 0, 1, "specify the destination IP");
+	
 	arg_end_t *end = (arg_end_t*) arg_end(20);
 	void *argtable[] = {help,myip,proto,source,dest,end};
 	
+
+
 	/* parse and act */
 	int nerrors = arg_parse(argc,argv,argtable);
 	if(nerrors == 0)
@@ -45,7 +50,28 @@ int main(int argc, char** argv)
 				goto exit_prog;
 			}
 
-			printf("Sending %s packet from %s to %s\n", proto->filename[0], source->filename[0], dest->filename[0]);
+
+			enum Protocol protocol = parse_protocol(proto->filename[0]);
+			if(protocol  == proto_ICMP)
+			{
+				printf("ICMP currently not supported.\n");
+			}
+			else if(protocol  == proto_UDP)
+			{
+				printf("UDP currently not supported.\n");
+			}
+			else if(protocol  == proto_TCP)
+			{
+				printf("TCP currently not supported.\n");
+			}
+			else
+			{
+				fprintf(stderr, "error: protocol %s is not supported.\n", proto->filename[0]);
+			}
+
+			/* printf("Sending %s packet from %s to %s\n", proto->filename[0], source->filename[0], dest->filename[0]); */
+			
+			
 		}
 
 

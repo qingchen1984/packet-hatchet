@@ -17,9 +17,8 @@ unsigned short csum(unsigned short *buf, int nwords);
 /* returns the source ip address */
 int getmyip(char *out);
 
-/* constructs a udp header */
-/* NOTE: src of NULL will use "real" src address */
-int construct_udp_header(udpheader_t *header, char *src, char *dst);
+/* fills a udp header */
+int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst, int numbytes);
 
 /* sends an ip packet with the payload in buf */
 int send_ip_packet(ipheader_t *header, char *buf, int numbytes);
