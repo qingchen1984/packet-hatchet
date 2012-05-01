@@ -3,6 +3,7 @@
 
 /*
 TODO:
+	- make '<' flag work
 */
 
 int main(int argc, char** argv)
@@ -94,9 +95,7 @@ int main(int argc, char** argv)
 			{
 				fprintf(stderr, "error: protocol %s is not supported.\n", proto->filename[0]);
 			}
-
-			/* printf("Sending %s packet from %s to %s\n", proto->filename[0], source->filename[0], dest->filename[0]); */
-			
+	
 			
 		}
 

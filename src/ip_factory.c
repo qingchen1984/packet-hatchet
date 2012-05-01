@@ -20,7 +20,7 @@ int getmyip(char *out)
 	if(out == NULL)
 		return -1;
 
-	memcpy(out, "127.0.0.1", sizeof(char) * 10);
+	memcpy(out, "172.12.131.1", sizeof(char) * 10);
 	return 0;
 }
 
