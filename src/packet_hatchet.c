@@ -1,4 +1,5 @@
 #include "packet_hatchet.h"
+#include "ip_factory.h"
 #include <stdio.h>
 
 /*
@@ -78,13 +79,43 @@ int main(int argc, char** argv)
 				}
 				unsigned short dstport = (unsigned short) dport->ival[0];
 
+				int numbytes = strlen(mcontent->sval[0]) + 1;
+
 				printf("Sending UDP packet...\nSource -> %s:%i\n"
 							       "Destination -> %s:%i\n"
 							       "Message Length -> %i bytes\n",
 							       source->filename[0], srcport,
 							       dest->filename[0], dstport,
-							       strlen(mcontent->sval[0]));
+							       numbytes);
 
+
+				/* construct headers and send packet */
+
+				int err;
+				int payloadsize = sizeof(udpheader_t) + numbytes;
+				char ip_payload[payloadsize];
+
+				if((err = fill_udp_header((udpheader_t*) ip_payload, srcport, dstport, numbytes)) != 0)
+				{
+					fprintf(stderr, "error: could not fill udp header, returned %i.\n", err);
+					exitstatus = -1;
+					goto exit_prog;
+				}
+
+				memcpy(ip_payload + sizeof(udpheader_t), mcontent->sval[0], numbytes);
+
+				ipheader_t iph;
+				iph.ip_p = 17;
+				inet_aton(source->filename[0], (struct in_addr*) &iph.ip_src);
+				inet_aton(dest->filename[0], (struct in_addr*) &iph.ip_dst);
+				if((err = send_ip_packet(&iph, ip_payload, payloadsize)) != 0)
+				{
+					fprintf(stderr, "error: could not send ip packet, returned %i.\n", err);
+					exitstatus = -1;
+					goto exit_prog;
+				}
+
+				printf("Packet sent. - SUCCESS\n");
 
 			}
 			else if(protocol  == proto_TCP)

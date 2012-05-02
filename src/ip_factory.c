@@ -29,8 +29,8 @@ int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst,
 	if(header == NULL)
 		return -1;
 
-	header->source = src;
-	header->dest = dst;
+	header->source = htons(src);
+	header->dest = htons(dst);
 	header->len = htons(sizeof(udpheader_t) + numbytes); 
 	header->check = 0; /* This is optional and I am lazy, ignore it */
 
@@ -64,7 +64,13 @@ int send_ip_packet(ipheader_t *header, char *buf, int numbytes)
 	memset(packet, 0, sizeofpacket);
 
 	/* set remaining ip header */
+	header->ip_hl = 5; /* header length is 5 32-bit octets */
+	header->ip_v = 4; /* IPv4 */
+	header->ip_tos = 16; /* low delay */
 	header->ip_len = sizeofpacket;
+	header->ip_id = htons(54321); /* identifier used for fragmentation */
+	header->ip_off = 0; /* fragmentation options */
+	header->ip_ttl = 64; /* max num hops */
 	header->ip_sum = csum((unsigned short*)packet, sizeofpacket);
 	
 	/* fill packet */
@@ -94,13 +100,13 @@ int send_ip_packet(ipheader_t *header, char *buf, int numbytes)
 
 	if(sendto(sd, packet, header->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
 	{
-		printf("Message sent! - SUCCESS\n");
-	}
-	else
-	{
 		perror("sendto()");
 		printf("sendto() call - FAIL\n");
 		return -1;
+	}
+	else
+	{
+		printf("Message sent! - SUCCESS\n");
 	}
 	
 	return 0;

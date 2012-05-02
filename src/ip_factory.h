@@ -21,6 +21,11 @@ int getmyip(char *out);
 int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst, int numbytes);
 
 /* sends an ip packet with the payload in buf */
+/* the header is expected to have the following already filled:
+   -IP protocol (ip_p)
+   -IP source (ip_src)
+   -IP destination (ip_dst)
+*/
 int send_ip_packet(ipheader_t *header, char *buf, int numbytes);
 
 #endif
