@@ -4,7 +4,11 @@
 
 /*
 TODO:
-	- make '<' flag work
+	- improve interface
+	- make a file input flag
+	- make getting my ip work
+	- make listener for UDP
+	- write Ping
 */
 
 int main(int argc, char** argv)
