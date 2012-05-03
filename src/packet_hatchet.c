@@ -41,17 +41,17 @@ int main(int argc, char** argv)
 		if(!mcontent->count)
 			mcontent->sval[0] = "";
 
-		/* Get glossary */
+		/* get glossary */
 		if(help->count)
 		{
 			arg_print_glossary(stdout, argtable, "%-25s %s\n");
 		}
-		/* Get current IP address */
+		/* get current IP address */
 		else if(myip->count)
 		{
 			printf("Current outfacing IP address is 127.0.0.1\n");
 		}
-		/* Send packet */
+		/* send packet */
 		else
 		{
 			if(!proto->count || !source->count || !dest->count)
@@ -89,8 +89,7 @@ int main(int argc, char** argv)
 							       numbytes);
 
 
-				/* construct headers and send packet */
-
+				/* construct UDP header */
 				int err;
 				int payloadsize = sizeof(udpheader_t) + numbytes;
 				char ip_payload[payloadsize];
@@ -102,10 +101,13 @@ int main(int argc, char** argv)
 					goto exit_prog;
 				}
 
+		
+				/* set up IP payload */
 				memcpy(ip_payload + sizeof(udpheader_t), mcontent->sval[0], numbytes);
 
+				/* send the ip packet */
 				ipheader_t iph;
-				iph.ip_p = 17;
+				iph.ip_p = 17; /* UDP */
 				inet_aton(source->filename[0], (struct in_addr*) &iph.ip_src);
 				inet_aton(dest->filename[0], (struct in_addr*) &iph.ip_dst);
 				if((err = send_ip_packet(&iph, ip_payload, payloadsize)) != 0)
@@ -114,9 +116,6 @@ int main(int argc, char** argv)
 					exitstatus = -1;
 					goto exit_prog;
 				}
-
-				printf("Packet sent. - SUCCESS\n");
-
 			}
 			else if(protocol  == proto_TCP)
 			{
