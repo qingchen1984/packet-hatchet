@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
+#include <ifaddrs.h>
+#include <arpa/inet.h>
 
 typedef struct ip ipheader_t;
 typedef struct udphdr udpheader_t;

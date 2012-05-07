@@ -1,4 +1,7 @@
-/* Code inspired by http://www.tenouk.com/Module43a.html */
+/* Code inspired by
+	http://www.tenouk.com/Module43a.html
+	http://stackoverflow.com/questions/212528/linux-c-get-the-ip-address-of-local-computer
+*/
 
 #include "ip_factory.h"
 
@@ -20,7 +23,34 @@ int getmyip(char *out)
 	if(out == NULL)
 		return -1;
 
-	memcpy(out, "172.12.131.1", sizeof(char) * 10);
+	struct ifaddrs *myaddrs;
+	struct ifaddrs *curaddr;
+	void *temp;
+
+	getifaddrs(&myaddrs);
+	
+	for(curaddr = myaddrs; curaddr != NULL; curaddr = curaddr->ifa_next)
+	{
+		/* IPv4 */
+		if(curaddr->ifa_addr->sa_family == AF_INET)
+		{
+			temp = &((struct sockaddr_in*)curaddr->ifa_addr)->sin_addr;
+			inet_ntop(AF_INET, temp, out, INET_ADDRSTRLEN);
+
+			/* TODO: How do I know they're using interface eth0? */
+			if(strcmp(curaddr->ifa_name, "eth0") == 0)
+			       break;	
+		}
+		/* IPv6 */
+		else if(curaddr->ifa_addr->sa_family == AF_INET6)
+		{
+			temp = &((struct sockaddr_in6*)curaddr->ifa_addr)->sin6_addr;
+			inet_ntop(AF_INET6, temp, out, INET6_ADDRSTRLEN);
+		}
+	}
+
+	if(myaddrs != NULL) freeifaddrs(myaddrs);
+
 	return 0;
 }
 

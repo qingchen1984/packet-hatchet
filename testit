@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./ph -p UDP -s 172.12.131.1 -d 10.11.12.13 --srcport=1234 --dstport=1234 "Hello World!"
+./ph -p UDP -d 10.11.12.13 --srcport=1234 --dstport=1234 "Hello World!"
 

@@ -41,28 +41,59 @@ int main(int argc, char** argv)
 	int nerrors = arg_parse(argc,argv,argtable);
 	if(nerrors == 0)
 	{
+		
+		char sourceipbuf[INET6_ADDRSTRLEN];
 
 		if(!mcontent->count)
 			mcontent->sval[0] = "";
+
+
+
 
 		/* get glossary */
 		if(help->count)
 		{
 			arg_print_glossary(stdout, argtable, "%-25s %s\n");
 		}
+
 		/* get current IP address */
 		else if(myip->count)
 		{
-			printf("Current outfacing IP address is 127.0.0.1\n");
+			if(getmyip(sourceipbuf) == 0)
+			{
+				printf("Your packets will have the source IP address %s\n", sourceipbuf);
+			}
+			else
+			{
+				fprintf(stderr, "error: could not get your IP address.\n");
+				exitstatus = -1;
+				goto exit_prog;
+			}
 		}
+
+
 		/* send packet */
 		else
 		{
-			if(!proto->count || !source->count || !dest->count)
+			if(!proto->count || !dest->count)
 			{
 				fprintf(stderr, "error: expected <protocol>, <source>, and <dest> specified.\n");
 				exitstatus = -1;
 				goto exit_prog;
+			}
+			
+			if(!source->count)
+			{
+				if(getmyip(sourceipbuf) != 0)
+				{
+					fprintf(stderr, "error: could not get your IP address.\n");
+					exitstatus = -1;
+					goto exit_prog;
+				}
+			}
+			else
+			{
+				strncpy(sourceipbuf, source->filename[0], INET6_ADDRSTRLEN);
 			}
 
 
@@ -88,7 +119,7 @@ int main(int argc, char** argv)
 				printf("Sending UDP packet...\nSource -> %s:%i\n"
 							       "Destination -> %s:%i\n"
 							       "Message Length -> %i bytes\n",
-							       source->filename[0], srcport,
+							       sourceipbuf, srcport,
 							       dest->filename[0], dstport,
 							       numbytes);
 
@@ -112,7 +143,7 @@ int main(int argc, char** argv)
 				/* send the ip packet */
 				ipheader_t iph;
 				iph.ip_p = 17; /* UDP */
-				inet_aton(source->filename[0], (struct in_addr*) &iph.ip_src);
+				inet_aton(sourceipbuf, (struct in_addr*) &iph.ip_src);
 				inet_aton(dest->filename[0], (struct in_addr*) &iph.ip_dst);
 				if((err = send_ip_packet(&iph, ip_payload, payloadsize)) != 0)
 				{
@@ -132,8 +163,6 @@ int main(int argc, char** argv)
 	
 			
 		}
-
-
 
 	}
 	else
