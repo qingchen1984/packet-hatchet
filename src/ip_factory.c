@@ -128,7 +128,7 @@ int send_ip_packet(ipheader_t *header, char *buf, int numbytes)
 		printf("setsockopt() call - SUCCESS\n");
 	}
 
-	if(sendto(sd, packet, header->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+	if(sendto(sd, packet, header->ip_len, 0, (struct sockaddr *) &din, sizeof(din)) < 0)
 	{
 		perror("sendto()");
 		printf("sendto() call - FAIL\n");
