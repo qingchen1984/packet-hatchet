@@ -54,6 +54,21 @@ int getmyip(char *out)
 	return 0;
 }
 
+int fill_icmp_header(icmpheader_t *header, uint8_t type, uint8_t code, uint32_t rest)
+{
+	if(header == NULL)
+		return -1;
+
+	header->type = type;
+	header->code = code;
+	header->checksum = 0;
+	memcpy(((uint32_t*)header) + 1, &rest, sizeof(uint32_t));
+
+	header->checksum = htons(csum((unsigned short*)header, sizeof(icmpheader_t)));
+
+	return 0;
+}
+
 int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst, int numbytes)
 {
 	if(header == NULL)
