@@ -64,7 +64,7 @@ int fill_icmp_header(icmpheader_t *header, uint8_t type, uint8_t code, uint32_t 
 	header->checksum = 0;
 	memcpy(((uint32_t*)header) + 1, &rest, sizeof(uint32_t));
 
-	header->checksum = htons(csum((unsigned short*)header, sizeof(icmpheader_t)));
+	header->checksum = htons(csum((unsigned short*)header, 4));
 
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include "packet_hatchet.h"
 #include "ip_factory.h"
+#include "bouncer.h"
 #include <stdio.h>
 
 /*
@@ -19,6 +20,8 @@ int main(int argc, char** argv)
 	/* declare CL args */
 	arg_lit_t *help = (arg_lit_t*) arg_lit0("h", "help", "prints the command glossary");
 	arg_lit_t *myip = (arg_lit_t*) arg_lit0("m", NULL, "prints the external ip of the interface currently being used");
+	arg_lit_t *bounce_opt = (arg_lit_t*) arg_lit0("b", NULL, "creates a bouncer to send the message received back to the sender");
+	arg_lit_t *listen_opt = (arg_lit_t*) arg_lit0("l", NULL, "creates a listener to print the messages received");
 	
 	arg_file_t *proto = (arg_file_t*) arg_filen("p", "protocol", "acronym", 0, 1, "specify the protocol being manipulated");
 	arg_file_t *source = (arg_file_t*) arg_filen("s", "source", "x.x.x.x", 0, 1, "specify the source IP");
@@ -29,7 +32,9 @@ int main(int argc, char** argv)
 	arg_str_t *mcontent = (arg_str_t*) arg_strn(NULL, NULL, "string", 0, 1, "message content as a string");
 	
 	arg_end_t *end = (arg_end_t*) arg_end(20);
-	void *argtable[] = {help,myip,proto,source,dest,sport,dport,mcontent,end};
+	void *argtable[] = {help,myip,bounce_opt,listen_opt,proto,source,
+			    dest,sport,dport,mcontent,end};
+
 	if(arg_nullcheck(argtable) != 0)
 	{
 		fprintf(stderr, "error: insufficient memory");
@@ -70,6 +75,50 @@ int main(int argc, char** argv)
 				goto exit_prog;
 			}
 		}
+		
+		/* start bouncer */
+		else if(bounce_opt->count)
+		{
+			if(!proto->count)
+			{
+				fprintf(stderr, "error: expected <protocol> specified.\n");
+				exitstatus = -1;
+				goto exit_prog;
+			}
+
+			if(getmyip(sourceipbuf) == 0)
+			{
+				printf("Your packets will have the source IP address %s\n", sourceipbuf);
+			}
+			else
+			{
+				fprintf(stderr, "error: could not get your IP address.\n");
+				exitstatus = -1;
+				goto exit_prog;
+			}
+		}
+		
+		/* start listener */
+		else if(listen_opt->count)
+		{
+			if(!proto->count)
+			{
+				fprintf(stderr, "error: expected <protocol> specified.\n");
+				exitstatus = -1;
+				goto exit_prog;
+			}
+
+			if(getmyip(sourceipbuf) == 0)
+			{
+				printf("Your packets will have the source IP address %s\n", sourceipbuf);
+			}
+			else
+			{
+				fprintf(stderr, "error: could not get your IP address.\n");
+				exitstatus = -1;
+				goto exit_prog;
+			}
+		}
 
 
 		/* send packet */
@@ -77,7 +126,7 @@ int main(int argc, char** argv)
 		{
 			if(!proto->count || !dest->count)
 			{
-				fprintf(stderr, "error: expected <protocol>, <source>, and <dest> specified.\n");
+				fprintf(stderr, "error: expected <protocol> and <dest> specified.\n");
 				exitstatus = -1;
 				goto exit_prog;
 			}
@@ -100,7 +149,37 @@ int main(int argc, char** argv)
 			enum Protocol protocol = parse_protocol(proto->filename[0]);
 			if(protocol  == proto_ICMP)
 			{
-				printf("ICMP currently not supported.\n");
+				printf("Sending ICMP packet...\nSource -> %s\n"
+							       "Destination -> %s\n"
+							       "Message Type -> %s\n",
+							       sourceipbuf,
+							       dest->filename[0],
+							       "dunno");
+
+				/* construct ICMP header */
+				int err;
+				int payloadsize = sizeof(icmpheader_t);
+				char ip_payload[payloadsize];
+
+				if((err = fill_icmp_header((icmpheader_t*) ip_payload, 0, 0, 0)) != 0)
+				{
+					fprintf(stderr, "error: could not fill icmp header, returned %i.\n", err);
+					exitstatus = -1;
+					goto exit_prog;
+				}
+
+
+				/* send the ip packet */
+				ipheader_t iph;
+				iph.ip_p = 1; /* ICMP */
+				inet_aton(sourceipbuf, (struct in_addr*) &iph.ip_src);
+				inet_aton(dest->filename[0], (struct in_addr*) &iph.ip_dst);
+				if((err = send_ip_packet(&iph, ip_payload, payloadsize)) != 0)
+				{
+					fprintf(stderr, "error: could not send ip packet, returned %i.\n", err);
+					exitstatus = -1;
+					goto exit_prog;
+				}
 			}
 			else if(protocol  == proto_UDP)
 			{
