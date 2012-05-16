@@ -5,11 +5,9 @@
 
 /*
 TODO:
-	- improve interface
-	- make a file input flag
-	- make getting my ip work
-	- make listener for UDP
-	- write Ping
+	-file input flag
+	-icmp type
+	-"localhost" support
 */
 
 int main(int argc, char** argv)
@@ -160,8 +158,14 @@ int main(int argc, char** argv)
 				int err;
 				int payloadsize = sizeof(icmpheader_t);
 				char ip_payload[payloadsize];
+				
+				/* identifier is upper 16 bits,
+				   sequence number is lower 16 bits */ 
+				uint32_t rest = htons(0x00);
+				rest <<= 16;
+				rest |= htons(0x7b);
 
-				if((err = fill_icmp_header((icmpheader_t*) ip_payload, 0, 0, 0)) != 0)
+				if((err = fill_icmp_header((icmpheader_t*) ip_payload, 8, 0, rest)) != 0)
 				{
 					fprintf(stderr, "error: could not fill icmp header, returned %i.\n", err);
 					exitstatus = -1;

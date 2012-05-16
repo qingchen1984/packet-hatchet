@@ -15,6 +15,7 @@
 /* initiates the packet bouncer which merely listens for incoming packets
    and reflects them back at the sender
 */
-int start_bouncer();
+int start_udp_bouncer();
+int start_icmp_bouncer();
 
 #endif
