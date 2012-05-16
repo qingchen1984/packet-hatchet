@@ -116,11 +116,13 @@ int send_ip_packet(ipheader_t *header, char *buf, int numbytes)
 	header->ip_id = htons(54321); /* identifier used for fragmentation */
 	header->ip_off = 0; /* fragmentation options */
 	header->ip_ttl = 64; /* max num hops */
-	header->ip_sum = csum((unsigned short*)packet, sizeofpacket);
+	header->ip_sum = 0;
 	
 	/* fill packet */
 	memcpy(packet, (char*) header, sizeof(ipheader_t));
 	memcpy(packet + sizeof(ipheader_t), (char*) buf, numbytes);
+	
+	header->ip_sum = csum((unsigned short*)packet, sizeofpacket / sizeof(short));
 
 	/* setup socket addresses */
 	struct sockaddr_in sin, din;
