@@ -24,7 +24,7 @@ int getmyip(char *out);
 
 /* fills a icmp header */
 /* rest is expected to already be properly htoned */
-int fill_icmp_header(icmpheader_t *header, uint8_t type, uint8_t code, uint32_t rest);
+int fill_icmp_header(icmpheader_t *header, uint8_t type, uint8_t code, uint32_t rest, int numbytes);
 
 /* fills a udp header */
 int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst, int numbytes);

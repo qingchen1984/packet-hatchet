@@ -8,7 +8,6 @@
 /*
 TODO:
 	-file input flag
-	-icmp type
 	-"localhost" support
 */
 
@@ -169,22 +168,23 @@ int main(int argc, char** argv)
 				int payloadsize = sizeof(icmpheader_t) + sizeof(time_t);
 				char ip_payload[payloadsize];
 				
+				/* copy in timestamp */
+				/* we must do this first for the checksum calculation */
+				t = htonl(t);
+				memcpy(ip_payload + sizeof(icmpheader_t), &t, sizeof(time_t));
+				
 				/* identifier is lower 16 bits,
 				   sequence number is upper 16 bits */ 
 				uint32_t rest = htons(0x00);
 				rest <<= 16;
 				rest |= htons(0x7b);
 
-				if((err = fill_icmp_header((icmpheader_t*) ip_payload, 8, 0, rest)) != 0)
+				if((err = fill_icmp_header((icmpheader_t*) ip_payload, 8, 0, rest, sizeof(time_t))) != 0)
 				{
 					fprintf(stderr, "error: could not fill icmp header, returned %i.\n", err);
 					exitstatus = -1;
 					goto exit_prog;
 				}
-
-				/* copy in timestamp */
-				/* TODO: fix checksum and htonl */
-				memcpy(ip_payload + sizeof(icmpheader_t), &t, sizeof(time_t));
 
 
 				/* send the ip packet */
