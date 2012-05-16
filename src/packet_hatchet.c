@@ -2,6 +2,8 @@
 #include "ip_factory.h"
 #include "bouncer.h"
 #include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
 
 /*
 TODO:
@@ -147,20 +149,28 @@ int main(int argc, char** argv)
 			enum Protocol protocol = parse_protocol(proto->filename[0]);
 			if(protocol  == proto_ICMP)
 			{
-				printf("Sending ICMP packet...\nSource -> %s\n"
+				time_t t;
+				if(time(&t) == -1)
+				{
+					fprintf(stderr, "error: could not get timestamp.\n");
+					exitstatus = -1;
+					goto exit_prog;
+				}
+
+				printf("Sending ICMP ping packet...\nSource -> %s\n"
 							       "Destination -> %s\n"
-							       "Message Type -> %s\n",
+							       "Message -> %i\n",
 							       sourceipbuf,
 							       dest->filename[0],
-							       "dunno");
+							       t);
 
 				/* construct ICMP header */
 				int err;
-				int payloadsize = sizeof(icmpheader_t);
+				int payloadsize = sizeof(icmpheader_t) + sizeof(time_t);
 				char ip_payload[payloadsize];
 				
-				/* identifier is upper 16 bits,
-				   sequence number is lower 16 bits */ 
+				/* identifier is lower 16 bits,
+				   sequence number is upper 16 bits */ 
 				uint32_t rest = htons(0x00);
 				rest <<= 16;
 				rest |= htons(0x7b);
@@ -171,6 +181,10 @@ int main(int argc, char** argv)
 					exitstatus = -1;
 					goto exit_prog;
 				}
+
+				/* copy in timestamp */
+				/* TODO: fix checksum and htonl */
+				memcpy(ip_payload + sizeof(icmpheader_t), &t, sizeof(time_t));
 
 
 				/* send the ip packet */
