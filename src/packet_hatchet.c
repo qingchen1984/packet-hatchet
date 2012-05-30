@@ -5,6 +5,9 @@
 #include <sys/time.h>
 #include <time.h>
 
+
+#define MAX_MESSAGELEN 256
+
 /*
 TODO:
 	-file input flag
@@ -123,6 +126,9 @@ int main(int argc, char** argv)
 		/* send packet */
 		else
 		{
+			size_t contentlen = 0;
+			char message_content[MAX_MESSAGELEN + 1];
+
 			if(!proto->count || !dest->count)
 			{
 				fprintf(stderr, "error: expected <protocol> and <dest> specified.\n");
@@ -144,6 +150,27 @@ int main(int argc, char** argv)
 				strncpy(sourceipbuf, source->filename[0], INET6_ADDRSTRLEN);
 			}
 
+			/* TODO: Is there a better way to do this? */
+			if(strlen(mcontent->sval[0]) == 0)
+			{
+				contentlen = read(STDIN_FILENO, message_content, MAX_MESSAGELEN);
+				if(contentlen < 0)
+				{
+					fprintf(stderr, "error: could not read message from stdin.\n");
+					perror("read");
+					exitstatus = -1;
+					goto exit_prog;
+
+				}
+				message_content[contentlen] = '\0';
+			}
+			else
+			{
+				int tempstrlen = strlen(mcontent->sval[0]);
+				contentlen = tempstrlen > MAX_MESSAGELEN ? MAX_MESSAGELEN : tempstrlen;
+				memcpy(message_content, mcontent->sval[0], contentlen);
+				message_content[contentlen] = '\0';
+			}
 
 			enum Protocol protocol = parse_protocol(proto->filename[0]);
 			if(protocol  == proto_ICMP)
@@ -211,22 +238,20 @@ int main(int argc, char** argv)
 				}
 				unsigned short dstport = (unsigned short) dport->ival[0];
 
-				int numbytes = strlen(mcontent->sval[0]) + 1;
-
 				printf("Sending UDP packet...\nSource -> %s:%i\n"
 							       "Destination -> %s:%i\n"
 							       "Message Length -> %i bytes\n",
 							       sourceipbuf, srcport,
 							       dest->filename[0], dstport,
-							       numbytes);
+							       contentlen);
 
 
 				/* construct UDP header */
 				int err;
-				int payloadsize = sizeof(udpheader_t) + numbytes;
+				int payloadsize = sizeof(udpheader_t) + contentlen;
 				char ip_payload[payloadsize];
 
-				if((err = fill_udp_header((udpheader_t*) ip_payload, srcport, dstport, numbytes)) != 0)
+				if((err = fill_udp_header((udpheader_t*) ip_payload, srcport, dstport, contentlen)) != 0)
 				{
 					fprintf(stderr, "error: could not fill udp header, returned %i.\n", err);
 					exitstatus = -1;
@@ -235,7 +260,7 @@ int main(int argc, char** argv)
 
 		
 				/* set up IP payload */
-				memcpy(ip_payload + sizeof(udpheader_t), mcontent->sval[0], numbytes);
+				memcpy(ip_payload + sizeof(udpheader_t), message_content, contentlen);
 
 				/* send the ip packet */
 				ipheader_t iph;
