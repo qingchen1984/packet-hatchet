@@ -10,8 +10,7 @@
 
 /*
 TODO:
-	-file input flag
-	-"localhost" support
+	-dns resolver support
 */
 
 int main(int argc, char** argv)
@@ -50,12 +49,29 @@ int main(int argc, char** argv)
 	{
 		
 		char sourceipbuf[INET6_ADDRSTRLEN];
+		size_t contentlen = 0;
+		char message_content[MAX_MESSAGELEN + 1];
 
 		if(!mcontent->count)
-			mcontent->sval[0] = "";
+		{
+			contentlen = read(STDIN_FILENO, message_content, MAX_MESSAGELEN);
+			if(contentlen < 0)
+			{
+				fprintf(stderr, "error: could not read message from stdin.\n");
+				perror("read");
+				exitstatus = -1;
+				goto exit_prog;
 
-
-
+			}
+			message_content[contentlen] = '\0';
+		}
+		else
+		{
+			int tempstrlen = strlen(mcontent->sval[0]);
+			contentlen = tempstrlen > MAX_MESSAGELEN ? MAX_MESSAGELEN : tempstrlen;
+			memcpy(message_content, mcontent->sval[0], contentlen);
+			message_content[contentlen] = '\0';
+		}
 
 		/* get glossary */
 		if(help->count)
@@ -126,8 +142,6 @@ int main(int argc, char** argv)
 		/* send packet */
 		else
 		{
-			size_t contentlen = 0;
-			char message_content[MAX_MESSAGELEN + 1];
 
 			if(!proto->count || !dest->count)
 			{
@@ -150,27 +164,6 @@ int main(int argc, char** argv)
 				strncpy(sourceipbuf, source->filename[0], INET6_ADDRSTRLEN);
 			}
 
-			/* TODO: Is there a better way to do this? */
-			if(strlen(mcontent->sval[0]) == 0)
-			{
-				contentlen = read(STDIN_FILENO, message_content, MAX_MESSAGELEN);
-				if(contentlen < 0)
-				{
-					fprintf(stderr, "error: could not read message from stdin.\n");
-					perror("read");
-					exitstatus = -1;
-					goto exit_prog;
-
-				}
-				message_content[contentlen] = '\0';
-			}
-			else
-			{
-				int tempstrlen = strlen(mcontent->sval[0]);
-				contentlen = tempstrlen > MAX_MESSAGELEN ? MAX_MESSAGELEN : tempstrlen;
-				memcpy(message_content, mcontent->sval[0], contentlen);
-				message_content[contentlen] = '\0';
-			}
 
 			enum Protocol protocol = parse_protocol(proto->filename[0]);
 			if(protocol  == proto_ICMP)
