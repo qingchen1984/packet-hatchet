@@ -11,6 +11,8 @@
 
 /*
 TODO:
+	-code review UDP listener code
+	-unify max message lengths in a config.h?
 	-dns resolver support
 */
 
