@@ -13,8 +13,9 @@
 #include <arpa/inet.h>
 
 typedef struct ip ipheader_t;
-typedef struct udphdr udpheader_t;
 typedef struct icmphdr icmpheader_t;
+typedef struct udphdr udpheader_t;
+typedef struct tcphdr tcpheader_t;
 
 /* checksum function for IP header only */
 unsigned short csum(unsigned short *buf, int nwords);
@@ -28,6 +29,10 @@ int fill_icmp_header(icmpheader_t *header, uint8_t type, uint8_t code, uint32_t 
 
 /* fills a udp header */
 int fill_udp_header(udpheader_t *header, unsigned short src, unsigned short dst, int numbytes);
+
+/* fills a tcp header */
+/* TODO: define TCP header filler here */
+int fill_tcp_header(tcpheader_t *header, int numbytes);
 
 /* sends an ip packet with the payload in buf */
 /* the header is expected to have the following already filled:

@@ -1,6 +1,7 @@
 #include "packet_hatchet.h"
 #include "ip_factory.h"
 #include "bouncer.h"
+#include "listener.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
@@ -52,6 +53,7 @@ int main(int argc, char** argv)
 		size_t contentlen = 0;
 		char message_content[MAX_MESSAGELEN + 1];
 
+		/* take into account stdin reading if necessary
 		if(!mcontent->count)
 		{
 			contentlen = read(STDIN_FILENO, message_content, MAX_MESSAGELEN);
@@ -71,7 +73,7 @@ int main(int argc, char** argv)
 			contentlen = tempstrlen > MAX_MESSAGELEN ? MAX_MESSAGELEN : tempstrlen;
 			memcpy(message_content, mcontent->sval[0], contentlen);
 			message_content[contentlen] = '\0';
-		}
+		} */
 
 		/* get glossary */
 		if(help->count)
@@ -125,14 +127,24 @@ int main(int argc, char** argv)
 				exitstatus = -1;
 				goto exit_prog;
 			}
-
-			if(getmyip(sourceipbuf) == 0)
+			
+			enum Protocol protocol = parse_protocol(proto->filename[0]);
+			if(protocol  == proto_UDP)
 			{
-				printf("Your packets will have the source IP address %s\n", sourceipbuf);
+				if(!sport->count)
+				{
+					fprintf(stderr, "error: expected <srcport> specified.\n");
+					exitstatus = -1;
+					goto exit_prog;
+				}
+
+				printf("Starting listener for UDP packets on port %u...\n", sport->ival[0]);
+				
+				start_udp_listener(sport->ival[0], print_packet);
 			}
 			else
 			{
-				fprintf(stderr, "error: could not get your IP address.\n");
+				fprintf(stderr, "Listening for %s packets is not supported.\n", proto->filename[0]);
 				exitstatus = -1;
 				goto exit_prog;
 			}
@@ -142,6 +154,27 @@ int main(int argc, char** argv)
 		/* send packet */
 		else
 		{
+			/* take into account stdin reading if necessary */
+			if(!mcontent->count)
+			{
+				contentlen = read(STDIN_FILENO, message_content, MAX_MESSAGELEN);
+				if(contentlen < 0)
+				{
+					fprintf(stderr, "error: could not read message from stdin.\n");
+					perror("read");
+					exitstatus = -1;
+					goto exit_prog;
+
+				}
+				message_content[contentlen] = '\0';
+			}
+			else
+			{
+				int tempstrlen = strlen(mcontent->sval[0]);
+				contentlen = tempstrlen > MAX_MESSAGELEN ? MAX_MESSAGELEN : tempstrlen;
+				memcpy(message_content, mcontent->sval[0], contentlen);
+				message_content[contentlen] = '\0';
+			}
 
 			if(!proto->count || !dest->count)
 			{
