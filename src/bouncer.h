@@ -11,11 +11,11 @@
 #include <netinet/ip_icmp.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include "ip_factory.h"
 
 /* initiates the packet bouncer which merely listens for incoming packets
    and reflects them back at the sender
 */
-int start_udp_bouncer();
-int start_icmp_bouncer();
+int bounce_udp_packet (char *message, size_t messagelen, struct sockaddr_in *src_addr, socklen_t addrlen);
 
 #endif

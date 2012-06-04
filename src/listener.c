@@ -68,5 +68,4 @@ int print_packet (char *message, size_t messagelen, struct sockaddr_in *src_addr
 		return -1;
 
 	printf("%s:%u->%s\n", inet_ntoa(src_addr->sin_addr), ntohs(src_addr->sin_port), message);
-
 }

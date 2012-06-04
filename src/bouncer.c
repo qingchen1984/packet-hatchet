@@ -1,11 +1,10 @@
 #include "bouncer.h"
 
-int start_udp_bouncer()
+int bounce_udp_packet (char *message, size_t messagelen, struct sockaddr_in *src_addr, socklen_t addrlen)
 {
-	return 0;
-}
+	if(message == NULL || src_addr == NULL)
+		return -1;
 
-int start_icmp_bouncer()
-{
-	return 0;
+	
+	printf("%s:%u->%s\n", inet_ntoa(src_addr->sin_addr), ntohs(src_addr->sin_port), message);	
 }

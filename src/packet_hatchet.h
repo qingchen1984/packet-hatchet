@@ -1,6 +1,12 @@
 #ifndef _packet_hatchet_H
 #define _packet_hatchet_H
 
+#include "ip_factory.h"
+#include "bouncer.h"
+#include "listener.h"
+#include <stdio.h>
+#include <sys/time.h>
+#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <argtable2.h>
