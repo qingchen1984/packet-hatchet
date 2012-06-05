@@ -2,6 +2,7 @@
 
 
 #define MAX_MESSAGELEN 256
+#define FILTER_BUFLEN 20
 
 /*
 TODO:
@@ -91,7 +92,7 @@ int main(int argc, char** argv)
 
 				printf("Starting bouncer for UDP packets on port %u...\n", sport->ival[0]);
 				
-				start_udp_listener(sport->ival[0], bounce_udp_packet);
+				/* start_udp_listener(sport->ival[0], bounce_udp_packet);*/
 			}
 			else
 			{
@@ -123,7 +124,12 @@ int main(int argc, char** argv)
 
 				printf("Starting listener for UDP packets on port %u...\n", sport->ival[0]);
 				
-				start_udp_listener(sport->ival[0], print_packet);
+				char filter[FILTER_BUFLEN];
+				memset(filter, 0, FILTER_BUFLEN);
+				sprintf(filter, "udp dst port %i", sport->ival[0]);
+
+				start_listener(filter);
+				/* start_udp_listener(sport->ival[0], print_packet);*/
 			}
 			else
 			{

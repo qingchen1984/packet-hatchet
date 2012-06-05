@@ -12,16 +12,11 @@
 #include <netinet/ip_icmp.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
-
-
-typedef int (*receive_handler_t) (char *message, size_t messagelen, struct sockaddr_in *src_addr, socklen_t addrlen);
-
-int print_packet (char *message, size_t messagelen, struct sockaddr_in *src_addr, socklen_t addrlen);
+#include <pcap.h>
 
 /* initiates the packet listener which listens for incoming packets
    and prints their contents
 */
-int start_udp_listener(unsigned short port, receive_handler_t handler);
-int start_icmp_listener(receive_handler_t handler);
+int start_listener(char *filter);
 
 #endif

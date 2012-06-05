@@ -1,5 +1,5 @@
 CC=gcc
-LDLIBS=-largtable2
+LDLIBS=-largtable2 -lpcap
 FLAGS=
 
 all:
