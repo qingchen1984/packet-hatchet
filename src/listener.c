@@ -10,17 +10,12 @@
 /* TODO: I HATE static variables like this */
 static pcap_t *tobreak;
 
-static void callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
-{
-	printf("Captured a packet of length %i.\n", header->len);
-}
-
 static void exit_loop(int signum)
 {
 	pcap_breakloop(tobreak);
 }
 
-int start_listener(char *filter)
+int start_listener(char *filter, packet_callback_t callback)
 {
 	/* look up devs to listen on as sniffing device */
 	char *dev, errbuf[PCAP_ERRBUF_SIZE];
@@ -80,4 +75,9 @@ int start_listener(char *filter)
 	pcap_close(handle);
 
 	return 0;
+}
+
+void print_udp_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
+{
+	printf("Captured a packet of length %i.\n", header->len);
 }

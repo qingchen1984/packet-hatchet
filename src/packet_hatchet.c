@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 				memset(filter, 0, FILTER_BUFLEN);
 				sprintf(filter, "udp dst port %i", sport->ival[0]);
 
-				start_listener(filter);
+				start_listener(filter, print_udp_packet);
 				/* start_udp_listener(sport->ival[0], print_packet);*/
 			}
 			else

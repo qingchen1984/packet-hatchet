@@ -15,9 +15,15 @@
 #include <pcap.h>
 #include <signal.h>
 
+
+typedef void (*packet_callback_t) (u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
+
+/* prints the contents of a udp packet in a human-readable format */
+void print_udp_packet (u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
+
 /* initiates the packet listener which listens for incoming packets
    and prints their contents
 */
-int start_listener(char *filter);
+int start_listener(char *filter, packet_callback_t callback);
 
 #endif
