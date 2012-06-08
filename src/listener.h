@@ -13,6 +13,7 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <pcap.h>
+#include <signal.h>
 
 /* initiates the packet listener which listens for incoming packets
    and prints their contents

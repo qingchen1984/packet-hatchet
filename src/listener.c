@@ -7,9 +7,17 @@
 #define SIZE_ETHERNET 14
 #define SNAPLEN 1024
 
+/* TODO: I HATE static variables like this */
+static pcap_t *tobreak;
+
 static void callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
 	printf("Captured a packet of length %i.\n", header->len);
+}
+
+static void exit_loop(int signum)
+{
+	pcap_breakloop(tobreak);
 }
 
 int start_listener(char *filter)
@@ -37,6 +45,7 @@ int start_listener(char *filter)
 
 	/* open the stream */
 	pcap_t *handle;
+	tobreak = handle;
 	handle = pcap_open_live(dev, SNAPLEN, 1, 1000, errbuf);
 	if(handle == NULL)
 	{
@@ -58,6 +67,12 @@ int start_listener(char *filter)
 		fprintf(stderr, "Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
 		return -1;
 	}
+
+	struct sigaction act;
+	act.sa_handler = exit_loop;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+	sigaction(SIGINT, &act, NULL);
 
 	pcap_loop(handle, -1, callback, NULL);
 
