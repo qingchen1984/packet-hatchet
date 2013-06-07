@@ -1,6 +1,8 @@
 CC=gcc
 LDLIBS=-largtable2 -lpcap
-FLAGS=
+FLAGS=-Wall
 
 all:
-	$(CC) $(FLAGS) $(LDLIBS) -o ph src/*.c
+	$(CC) $(FLAGS) -o ph src/*.c $(LDLIBS)
+clean:
+	rm -f src/*.o ph

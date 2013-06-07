@@ -203,7 +203,7 @@ int main(int argc, char** argv)
 							       "Message -> %i\n",
 							       sourceipbuf,
 							       dest->filename[0],
-							       t);
+							       (int) t);
 
 				/* construct ICMP header */
 				int err;
@@ -255,10 +255,10 @@ int main(int argc, char** argv)
 
 				printf("Sending UDP packet...\nSource -> %s:%i\n"
 							       "Destination -> %s:%i\n"
-							       "Message Length -> %i bytes\n",
+							       "Message Length -> %u bytes\n",
 							       sourceipbuf, srcport,
 							       dest->filename[0], dstport,
-							       contentlen);
+							       (unsigned int) contentlen);
 
 
 				/* construct UDP header */

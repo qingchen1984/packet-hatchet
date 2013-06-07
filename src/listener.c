@@ -40,13 +40,13 @@ int start_listener(char *filter, packet_callback_t callback)
 
 	/* open the stream */
 	pcap_t *handle;
-	tobreak = handle;
 	handle = pcap_open_live(dev, SNAPLEN, 1, 1000, errbuf);
 	if(handle == NULL)
 	{
 		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
 		return -1;
 	}
+	tobreak = handle;
 	printf("Live stream opened - SUCCESS\n");
 
 
