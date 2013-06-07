@@ -1,7 +1,6 @@
 Packet Hatchet
 ---------------
 
--Dependencies:
-	libargtable2-dev
-	lippcap-dev
-
+##Dependencies:
+-libargtable2-dev
+-lippcap-dev
