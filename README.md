@@ -33,7 +33,8 @@ Spoof sender of message.
 ##TODO
 * Fix external IP printing in case of IPv6
 * Allow for standard input redirection
-* DNS options
+* Allow additional options for TCP flags and sequence numbers
+* DNS support
 
 ##Dependencies:
 * libargtable2-dev
